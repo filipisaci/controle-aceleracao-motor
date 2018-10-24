@@ -75,6 +75,8 @@ def enviaEmail():
     text = msg.as_string()
     server.sendmail(fromaddr, toaddr, text)
     server.quit()
+    t2 = threading.Timer(intervaloEmail, enviaEmail)
+    t2.start()
 
 def validaEntrada(entrada):
     return entrada >= 20 and entrada <= 50
@@ -105,6 +107,7 @@ def calculoVelocidade():
         t = threading.Timer(1, calculoVelocidade)
         t.start()
     if ligado == 1:
+        print('Threads correntes em execução: ', threading.active_count())
         while contador != numeroDentes:
                 if GPIO.event_detected(sensor):
                     contador += 1
@@ -195,7 +198,7 @@ def rampaDescida(setpoint, fracaoTempo, p):
     setup()
 
 # Thread para envio de e-mail
-t2 = threading.Timer(1, enviaEmail)
+t2 = threading.Timer(intervaloEmail, enviaEmail)
 t2.start()
 
 ### Desenhando a tela
