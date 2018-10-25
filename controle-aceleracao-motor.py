@@ -10,6 +10,11 @@ from functools import partial
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from dotenv import load_dotenv
+import os
+
+# Carrega as variáveis ambientes
+load_dotenv()
 
 ### Variaveis globais
 sensor = 29
@@ -23,9 +28,8 @@ entrada = 0
 sentidoAtual = 0
 numeroDentes = 10
 rpm = 0
-t = 0
 t2 = 0
-intervaloEmail = 10
+intervaloEmail = 3600
 controleThread = 0
 # contador eh cada vez que o sensor passar pelo dente
 contador = 0
@@ -52,6 +56,11 @@ master.title("Supervisorio")
 
 def on_closing():
     global t, t2
+    t2.cancel()
+    try:
+        t.cancel()
+    except NameError:
+        print('')
     print('Threads correntes ao sair: ', threading.active_count())
     GPIO.cleanup()
     print('Saindo...')
@@ -61,8 +70,8 @@ def on_closing():
 def enviaEmail():
     global sentidoAtual, rpm
     print('Enviando e-mail')
-    fromaddr = "engmecasatc@gmail.com"
-    toaddr = "filipi.saci@gmail.com;emaildasusanthiel@gmail.com"
+    fromaddr = os.getenv("DE")
+    toaddr = os.getenv("PARA")
     msg = MIMEMultipart()
     msg['From'] = fromaddr
     msg['To'] = toaddr
@@ -71,7 +80,7 @@ def enviaEmail():
     msg.attach(MIMEText(body, 'html'))
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
-    server.login(fromaddr, "s1a2t3c4")
+    server.login(fromaddr, os.getenv("SENHA"))
     text = msg.as_string()
     server.sendmail(fromaddr, toaddr, text)
     server.quit()
